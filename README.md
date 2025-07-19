@@ -17,6 +17,26 @@ Spring Bootを用いた簡易ATMシステムです。
 
 ---
 
+## 新規登録画面
+
+ログイン画面から遷移して、新規ユーザー登録ができます。
+
+以下の項目を入力すると、登録が完了します：
+
+- ユーザー名
+- メールアドレス
+- パスワード
+- 暗証番号（4桁）
+- 初期残高
+
+登録後は、ログインしてATM機能を利用できるようになります。
+---
+
+<img width="674" height="334" alt="Image" src="https://github.com/user-attachments/assets/73de34c6-a00a-49b1-9e6f-6b46542cbbb2" />
+
+
+
+---
 ## 使用技術
 - バックエンド：Spring Boot, Spring Security, JPA (Hibernate)
 - フロントエンド：Thymeleaf, HTML/CSS
