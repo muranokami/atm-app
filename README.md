@@ -72,6 +72,22 @@ Spring Bootを用いた簡易ATMシステムです。
 ---
 <img width="612" height="605" alt="Image" src="https://github.com/user-attachments/assets/a04e99d7-bead-49bd-808e-17dae051e7b9" />
 
+## 残高照会画面
+
+現在の口座残高を確認できる画面です。
+
+ログイン後、ホーム画面の「残高照会」ボタンを押すことで遷移します。
+
+### 表示内容
+- ログイン中のユーザー名（またはID）
+- 現在の残高（円単位）
+
+### 特徴
+- 表示のみで、データの変更は行われません。
+- セキュリティの観点から、必要に応じて残高表示の制限やマスク表示の実装も可能です。※今後実装予定
+---
+<img width="613" height="376" alt="Image" src="https://github.com/user-attachments/assets/bb190948-16d0-4cea-823a-7dda7a521eff" />
+
 ---
 ## 使用技術
 - バックエンド：Spring Boot, Spring Security, JPA (Hibernate)
