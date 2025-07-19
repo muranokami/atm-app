@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<title>ログイン</title>
+	<link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+	
+	<div class="container">
+		<p th:if="${param.logout} and ${param.username != null}" style="color: green;"
+		   th:text="${param.username} + 'さん、ログアウトしました'"></p>
+		   
+		<p th:if="${param.logout} and ${param.username == null}" style="color: green;">
+		  ログアウトしました
+		</p>
+
+		<h1>ATMログイン</h1>
+		<form th:action="@{/atm/login}" method="post">
+			<input type="text" name="username" placeholder="ユーザー名"
+			       th:value="${username != null} ? ${username} : ''">
+			<input type="password" name="password" placeholder="パスワード">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			<button type="submit">ログイン</button>
+		</form>
+		<p th:if="${param.error}" style="color: red;">ユーザー名またはパスワードが間違っています</p>
+		<p>アカウントをお持ちでない方は
+			<a th:href="@{/register}" class="register-link-button">新規登録</a>
+		</p>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>取引履歴</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+	<div calss="container"></div>
+	  <h2>取引履歴</h2>
+	  <p class="global-message" th:text="|${username} さんの取引履歴|">ユーザー名 さんの取引履歴</p>
+	  <table border="1" style="width: 100%; border-collapse: collapse;">
+		<thead>
+		  <tr style="background-color: #3498db; color: white;">
+			  <th style="padding: 10px;">番号</th>
+			  <th style="padding: 10px;">日時</th>
+			  <th style="padding: 10px;">種類</th>
+			  <th style="padding: 10px;">金額</th>
+		  </tr>
+		</thead>
+		<tbody>
+		  <tr th:each="tx, iterStat : ${transactions}"
+		      style="text-align: center; border-bottom: 1px solid #ddd;">
+			  <td style="padding: 8px;" th:text="${iterStat.count}">1</td>
+			  <td style="padding: 8px;" th:text="${#temporals.format(tx.transactionTime, 'yyyy-MM-dd HH:mm:ss')}">2025-07-13 22:30</td>
+			  <td style="padding: 8px;" th:text="${tx.type == 'deposit' ? '入金' : '出金'}">入金</td>
+			  <td style="padding: 8px;" th:text="|${#numbers.formatInteger(tx.amount, 3, 'COMMA')} 円|">10,000</td>
+		  </tr>
+		</tbody>
+	</table>
+	
+	<div class="button-group" style="margin-top: 30px"></div>
+      <a th:href="@{/atm/}">
+		  <button type="button">戻る</button>
+	  </a>
+    </div>
+</body>
+</html>

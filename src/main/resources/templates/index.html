@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>簡易ATM</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+	<p th:if="${successMessage}" class="global-message success" th:text="${successMessage}"></p>
+	<p th:if="${errorMessage}" class="global-message error" th:text="${errorMessage}"></p>
+	
+    <div class="container">
+        <!-- ユーザー名とログイン日時 -->
+        <p class="welcome-message" th:text="'ようこそ、' + ${username} + ' さん！'">ようこそ、〇〇さん！</p>
+        <p class="update-time" th:text="'ログイン日時：' + ${loginTime}">ログイン日時：2025/07/13 22:52</p>
+
+        <!-- 残高表示 -->
+       <p class="balance-display">
+		   現在の残高：<strong th:text="${#numbers.formatInteger(balance, 3, 'COMMA')}">0</strong> 円
+	   </p>
+
+       
+        <div class="button-grid">
+			<a th:href="@{/atm/balance}"><button>残高照会</button></a>
+			<a th:href="@{/transaction/deposit}"><button>入金</button></a>
+			<a th:href="@{/transaction/withdraw}"><button>出金</button></a>
+			<a th:href="@{/transaction/transactions}"><button>取引履歴</button></a>
+			
+			<!-- ログアウト -->
+			<div class="logout-container"></div>
+			  <form th:action="@{/logout}" method="post">
+				  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+				  <button type="submit">ログアウト</button>
+			  </form>
+			 </div>
+		</div>
+    </div>
+</body>
+</html>
