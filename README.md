@@ -216,7 +216,7 @@ Spring Bootを用いた簡易ATMシステムです。
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/yourname/atm-app.git
+git clone https://github.com/muranokami/atm-app.git
 cd atm-app
 
 # PostgreSQLを起動し、設定を application.properties に記述
