@@ -10,7 +10,7 @@ Spring Bootを用いた簡易ATMシステムです。
 - ユーザー登録 / ログイン（Spring Security使用）
 - 入金 / 出金
 - 残高照会
-- 振込機能（他ユーザーへの送金）※今後実装予定
+- 振込機能（他ユーザーへの送金）
 - 取引履歴の表示
 - パスワード変更
 - 利用制限 / アカウントロック機能 ※今後実装予定
@@ -22,7 +22,7 @@ Spring Bootを用いた簡易ATMシステムです。
 ログイン画面では、登録済みのユーザー名とパスワードを入力してログインできます。
 ---
 
-<img width="674" height="334" alt="Image" src="https://github.com/user-attachments/assets/73de34c6-a00a-49b1-9e6f-6b46542cbbb2" />
+<img width="821" height="329" alt="Image" src="https://github.com/user-attachments/assets/6c986b14-819e-450f-ab27-3dfafdea60da" />
 
 
 ## 新規登録画面
@@ -48,7 +48,7 @@ Spring Bootを用いた簡易ATMシステムです。
 登録が完了すると、**自動的にログイン状態**となり、ATMのホーム画面に遷移します。
 
 ---
-<img width="586" height="681" alt="Image" src="https://github.com/user-attachments/assets/7475e8a0-d9c1-462d-99a1-4d9a840f23e8" />
+<img width="786" height="694" alt="Image" src="https://github.com/user-attachments/assets/4b5d6b51-3bbb-4237-a36f-895f6d3b0579" />
 
 ## ホーム画面
 
@@ -65,12 +65,13 @@ Spring Bootを用いた簡易ATMシステムです。
 
 - 💰 **入金**：指定した金額を残高に追加します。
 - 🏧 **出金**：指定した金額を残高から引き出します。
+- 💸 **振込**：他のユーザーへ指定した金額を送金できます。送金元と送金先の両方に取引履歴が記録されます。
 - 📊 **残高照会**：現在の残高を確認できます。
-- 📜 **取引履歴**：これまでの入出金履歴を時系列で表示します。
+- 📜 **取引履歴**：これまでの入出金、振込（送金・受取）履歴を時系列で表示・検索できます。
 - 🔐 **ログアウト**：現在のセッションを終了し、ログイン画面に戻ります。
 
 ---
-<img width="612" height="605" alt="Image" src="https://github.com/user-attachments/assets/a04e99d7-bead-49bd-808e-17dae051e7b9" />
+<img width="799" height="656" alt="Image" src="https://github.com/user-attachments/assets/002fc056-a521-421d-9cd3-5c13eb6b0262" />
 
 ## 残高照会画面
 
@@ -86,7 +87,7 @@ Spring Bootを用いた簡易ATMシステムです。
 - 表示のみで、データの変更は行われません。
 - セキュリティの観点から、必要に応じて残高表示の制限やマスク表示の実装も可能です。※今後実装予定
 ---
-<img width="613" height="376" alt="Image" src="https://github.com/user-attachments/assets/bb190948-16d0-4cea-823a-7dda7a521eff" />
+<img width="806" height="384" alt="Image" src="https://github.com/user-attachments/assets/243edde4-d03a-4687-83b9-774c98728caf" />
 
 ## 💰 入金画面
 
@@ -109,7 +110,7 @@ Spring Bootを用いた簡易ATMシステムです。
 - 同時に、入金履歴が取引履歴に記録されます。
 
 ---
-<img width="622" height="397" alt="Image" src="https://github.com/user-attachments/assets/8ac17469-983c-45fe-980f-8f774cb726cd" />
+<img width="818" height="428" alt="Image" src="https://github.com/user-attachments/assets/46737371-4753-4c03-bac3-2310d1ba01fb" />
 
 ## 🏧 出金画面
 
@@ -130,26 +131,60 @@ Spring Bootを用いた簡易ATMシステムです。
 - 出金完了後、最新の残高が表示されます。  
 - 出金履歴が取引履歴に記録されます。
 ---
-<img width="599" height="382" alt="Image" src="https://github.com/user-attachments/assets/1a7728c5-80a7-481b-9d3c-c7f429a4c1d2" />
+<img width="804" height="403" alt="Image" src="https://github.com/user-attachments/assets/3701135f-81e8-4c85-a51a-fc9de06e715a" />
+
+## 🛠️ 振込画面
+
+本アプリの振込機能では、ログイン中のユーザーが他のユーザーに金額を送金できます。
+
+### 実装概要
+
+- 送金者の残高を減額し、受取者の残高を加算します。
+- 送金者には「振込（transfer）」、受取者には「受取（receive）」という2件の取引履歴が記録されます。
+- 処理は1つのメソッド内で完結し、`@Transactional` により整合性が保証されます。
+
+### 主な処理の流れ
+
+1. ユーザー名で送金元・受取先を検索
+2. 送金元の残高が不足していないか確認
+3. 両者の残高を更新
+4. `Transaction` エンティティをそれぞれ作成・保存（送金と受取）
+5. 処理全体をトランザクションで囲む
+
+### 取引履歴への反映
+
+| ユーザー種別 | 取引タイプ | 金額 | 相手ユーザー名 |
+|--------------|------------|------|----------------|
+| 送金者       | `transfer` | -1000 | `tanaka`       |
+| 受取者       | `receive`  | +1000 | `yamada`       |
+
+検索画面では、取引種別や相手ユーザー名で絞り込みが可能です。
+---
+
+<img width="816" height="432" alt="Image" src="https://github.com/user-attachments/assets/11140c71-3aa6-412f-a6f2-0270bf6fc462" />
 
 ## 📜 取引履歴画面
 
-過去の入金・出金・振込などの取引履歴を一覧で表示します。
+過去に行った入出金および振込の履歴を一覧で確認できる画面です。
 
-### 表示内容
+### 🔍 表示内容
 
-- 取引日時  
-- 取引種類（入金・出金・振込）  
-- 金額  
-- 取引後の残高  
-- 取引相手（振込先・振込元）
+- **取引日時**：各取引の実行日時  
+- **取引種別**：`入金`・`出金`・`振込（送金）`・`振込（受取）`  
+- **金額**：取引によって増減した金額  
+- **取引後残高**：該当取引後の残高  
+- **取引相手**：振込の場合、送金先または受取元のユーザー名
 
-### 特徴
+### 💡 特徴
 
-- 最新の取引が画面上部に表示されます。  
-- 資金の動きを時系列で確認可能です。
+- 取引は **最新のものが上に表示** されます  
+- 振込は、送金者・受取者の双方に別々の履歴として記録されます  
+  - 送金者側：`振込（送金）` としてマイナス表示  
+  - 受取者側：`振込（受取）` としてプラス表示  
+- 日付や取引種別、取引相手での **フィルタリング機能** を搭載
+
 ---
-<img width="1360" height="651" alt="Image" src="https://github.com/user-attachments/assets/e6446339-a851-45be-a682-d0ef31a2688e" />
+<img width="787" height="693" alt="Image" src="https://github.com/user-attachments/assets/0eb100f0-d3ed-4187-8cb6-cd4f2d2f43b6" />
 
 ---
 ## 使用技術
