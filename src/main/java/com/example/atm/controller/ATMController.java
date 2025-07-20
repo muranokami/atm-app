@@ -16,11 +16,22 @@ import com.example.atm.Service.UserService;
 import com.example.atm.details.CustomUserDetails;
 import com.example.atm.entity.User;
 
+/**
+ * ATMコントローラークラス
+ * 
+ * ATMのホーム画面表示、残高照会表示、ログイン画面表示の処理を行う
+ */
 @Controller
 @RequestMapping("/atm")
 public class ATMController {
     @Autowired
     private UserService userService;
+    
+    /**
+     * ホーム画面表示
+     * ログインユーザーの情報を取得し、残高やログイン時刻等をモデルにセットしindex.htmlに返す
+     * 未ログインの場合はログイン画面にリダイレクト
+     */
     
     @GetMapping("/")
     public String home(@AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -29,33 +40,42 @@ public class ATMController {
         System.out.println("【DEBUG】ATMController.home() 呼ばれました。userDetails=" + customUserDetails);
         if (customUserDetails == null) {
             System.out.println("【DEBUG】userDetailsがnull");
-            return "redirect:/atm/login";
+            return "redirect:/atm/login"; //ログイン画面へリダイレクト
         }
+        
+        //モデルの中身をデバッグ表示
         model.asMap().forEach((k, v) -> System.out.println("【DEBUG】model[" + k + "] = " + v));
 
         
         String username = customUserDetails.getUsername();
         System.out.println("【DEBUG】userDetails.getname() = " + username);
         
+        //ユーザーの最終ログイン時刻を表示
         userService.loginTime(username);
         
+        //ユーザー情報をDBから取得
         User user = userService.findByUsername(username);
         if(user == null) {
             System.out.println("【DEBUG】userService.findByUsernameがnullを返しました。username=" + username);
             model.addAttribute("errorMessage", "ユーザー情報が見つかりません。");
-            return "error";
+            return "error";//エラーページに遷移
         }
+        
         System.out.println("【DEBUG】Userの残高: " + user.getBalance());
         
+        //Viewに必要なデータをセット
         model.addAttribute("username", username);
         model.addAttribute("message", "ATMへようこそ");
         model.addAttribute("loginTime", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")));
-
-        
         model.addAttribute("balance", user.getBalance());
-        return "index";
+        
+        return "index";//ホーム画面のテンプレート名
     }
     
+    /**
+     * 残高照会表示
+     * 
+     */
     @GetMapping("/balance")
     public String showBalance(@AuthenticationPrincipal CustomUserDetails customUserDetails, Model model) {
         String username = customUserDetails.getUsername();
@@ -66,8 +86,12 @@ public class ATMController {
         return "balance";
     }
     
-
-
+    /**
+     * ログイン画面表示
+     * ログイン失敗やログアウト時のメッセージ表示
+     * 
+     */
+    
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String username,
                         @RequestParam(required = false) String pin,

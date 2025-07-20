@@ -1,5 +1,6 @@
 @charset "UTF-8";
 
+/* === 共通基本スタイル === */
 body {
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f5f7fa;
@@ -8,8 +9,9 @@ body {
     color: #333;
 }
 
+/* === コンテナ基本レイアウト === */
 .container {
-    max-width: 500px;
+    max-width: 700px;
     margin: auto;
     background: white;
     padding: 30px;
@@ -17,17 +19,21 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
+
+/* === ヘッダー見出し === */
 h1 {
     text-align: center;
-    color: #2c3e50;
+    color: #27ae60;
 }
 
+/* === 入力フォームスタイル === */
 form {
     margin: 15px 0;
     display: flex;
     justify-content: space-between;
 }
 
+/* 数値入力用スタイル */
 input[type="number"] {
     flex: 1;
     padding: 8px;
@@ -36,6 +42,7 @@ input[type="number"] {
     border-radius: 5px;
 }
 
+/* === ボタンの基本スタイル === */
 button {
     padding: 8px 12px;
     background-color: #3498db;
@@ -50,6 +57,7 @@ button:hover {
     background-color: #2980b9;
 }
 
+/* === メッセージ表示関連 === */
 .message {
     display: block;
     font-size: 1.1em;
@@ -61,6 +69,7 @@ button:hover {
     color: green;
 }
 
+/* === ウェルカムメッセージ === */
 .welcome-message {
 	color: green;
 	font-weight: bold;
@@ -69,6 +78,12 @@ button:hover {
 	text-align: center;
 }
 
+.message.success {
+	color: green;
+}
+
+
+/* === ログイン時間表示 === */
 .login-time {
 	text-align: center;
 	font-size: 0.95em;
@@ -76,6 +91,7 @@ button:hover {
 	margin-bottom: 30px;
 }
 
+/* === ログアウトボタンスタイル === */
 .logout-centainer {
 	margin-top: 40px;
 	text-align: center;
@@ -97,6 +113,7 @@ button:hover {
 }
 
 
+/* ログアウト後のメッセージ表示 */
 .logout-message {
 	position: absolute;
 	top: 20px;
@@ -115,7 +132,7 @@ button:hover {
     color: red;
 }
 
-/* --- メッセージ共通表示エリア --- */
+
 .global-message {
 	text-align: center;
 	font-size: 	1.2em;
@@ -124,14 +141,14 @@ button:hover {
 	font-weight: bold;
 }
 
+/* === 残高スタイル === */
 .balance {
     font-weight: bold;
     margin-bottom: 20px;
     font-size: 1.2em;
 }
 
-
-/* --- ボタングループ配置（枠だけ） --- */
+/* === ボタングループ（横並び） === */
 .button-group {
 	display: flex;
 	justify-content: center;
@@ -151,6 +168,7 @@ button:hover {
 	margin: 0;
 }
 
+/* === 更新時間表示エリア === */
 .update-time {
 	text-align: center;
 	font-size: 0.95em;
@@ -159,6 +177,7 @@ button:hover {
 	margin-bottom: 20px;
 }
 
+/* === ボタングループ（縦並び） === */
 .button-column {
 	display: flex;
 	flex-direction: column;
@@ -183,8 +202,8 @@ button:hover {
 	background-color: #2980b9;
 }
 
-/* === 登録画面用 === */
 
+/* === 登録フォームスタイル === */
 form.register-form {
 	display: flex;
 	flex-direction: column;
@@ -219,6 +238,7 @@ form.register-form button:hover {
 	background-color: #27ae60;
 }
 
+/* 登録失敗メッセージ */
 .register-error-message {
   color: #e74c3c; 
   background-color: #fdecea; 
@@ -231,6 +251,7 @@ form.register-form button:hover {
   text-align: center;
 }
 
+/* ホーム画面のボタン配置 */
 .button-grid {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
@@ -260,13 +281,7 @@ form.register-form button:hover {
 	background-color: #2980b9;
 }
 
-h1 {
-	text-align: center;
-	color: #27ae60;
-	font-size: 1.8em;
-	margin-bottom: 25px;
-}
-
+/* 残高表示スタイル */
 .balance-display {
 	font-size: 2em;
 	font-weight: bold;
@@ -287,6 +302,56 @@ h1 {
 	text-align: flex;
 	justify-content: center;
 	gap: 20px;
+}
+
+/* === 振込フォーム関連 === */
+.transfer-form {
+	display: block;
+}
+
+/* フォーム入力グループのスタイル */
+.transfer-form .form-group {
+	display: flex;
+	flex-direction: column;
+	margin-bottom: 15px;
+}
+
+.transfer-form label {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+/* 入力欄スタイル */
+.transfer-form input[type="text"]
+.transfer-form input[type="number"] {
+	width: 100%;
+	padding: 10px;
+	font-size: 1em;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+}
+
+/* 振込送信ボタン */
+.transfer-form button {
+	padding: 10px;
+	background-color: #28a745;
+	color: white;
+	border: none;
+	border-radius: 6px;
+	font-size: 1em;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+.transfer-form button:hover {
+	background-color: #218838;
+}
+
+/* 振込時のエラーメッセージ */
+.transfer-error-message {
+	color: red;
+	font-weight: bold;
+	margin-bottom: 10px;
 }
 
 

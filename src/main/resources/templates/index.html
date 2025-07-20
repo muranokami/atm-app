@@ -3,32 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <title>簡易ATM</title>
+    
+    <!-- 外部CSSファイルを読み込む。Thymeleaf構文でURLを解決 -->
     <link rel="stylesheet" th:href="@{/style.css}">
 </head>
 <body>
+	
+	<!-- グローバルな通知メッセージ表示（成功） -->
 	<p th:if="${successMessage}" class="global-message success" th:text="${successMessage}"></p>
+	
+	<!-- グローバルな通知メッセージ表示（エラー） -->
 	<p th:if="${errorMessage}" class="global-message error" th:text="${errorMessage}"></p>
 	
     <div class="container">
+		
         <!-- ユーザー名とログイン日時 -->
         <p class="welcome-message" th:text="'ようこそ、' + ${username} + ' さん！'">ようこそ、〇〇さん！</p>
         <p class="update-time" th:text="'ログイン日時：' + ${loginTime}">ログイン日時：2025/07/13 22:52</p>
 
-        <!-- 残高表示 -->
+       <!-- 現在の残高（カンマ区切りで表示） -->
        <p class="balance-display">
 		   現在の残高：<strong th:text="${#numbers.formatInteger(balance, 3, 'COMMA')}">0</strong> 円
 	   </p>
 
-       
+       <!-- 各種ATM機能へのリンク（ボタン形式） -->
         <div class="button-grid">
 			<a th:href="@{/atm/balance}"><button>残高照会</button></a>
 			<a th:href="@{/transaction/deposit}"><button>入金</button></a>
 			<a th:href="@{/transaction/withdraw}"><button>出金</button></a>
+			<a th:href="@{/transaction/transfer}"><button>振込</button></a>
 			<a th:href="@{/transaction/transactions}"><button>取引履歴</button></a>
 			
-			<!-- ログアウト -->
+			<!-- ログアウトフォーム（POSTでログアウト処理を送信） -->
 			<div class="logout-container"></div>
 			  <form th:action="@{/logout}" method="post">
+				  
+				  <!-- CSRFトークン（Spring Security用） -->
 				  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 				  <button type="submit">ログアウト</button>
 			  </form>

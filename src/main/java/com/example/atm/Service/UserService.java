@@ -6,13 +6,16 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.atm.details.CustomUserDetails;
+import com.example.atm.entity.Transaction;
 import com.example.atm.entity.User;
+import com.example.atm.repository.TransactionRepository;
 import com.example.atm.repository.UserRepository;
 import com.example.atm.result.RegisterResult;
 import com.example.atm.result.RegisterResultType;
@@ -20,6 +23,10 @@ import com.example.atm.result.RegisterResultType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
+/**
+ * ATMアプリのユーザーに関連するビジネスロジックを提供するサービスクラス
+ * ユーザー登録、入金・出金、振込、取引履歴の記録、ログイン処理などを担当
+ */
 @Service
 @Transactional
 public class UserService {
@@ -31,6 +38,13 @@ public class UserService {
     
     @Autowired
     private HttpServletRequest request;
+    
+    @Autowired
+    private TransactionRepository transactionRepository;
+    
+    /**
+     * ユーザーを新規登録し、登録後に自動ログインを行う
+     */
     
     @Transactional
     public RegisterResult registerUser(String username, String email, String password, String pin, int balance) {
@@ -72,6 +86,9 @@ public class UserService {
         return new RegisterResult(true, RegisterResultType.SUCCESS);
     }
     
+    /**
+     * 指定されたユーザー名に対応するユーザーを取得
+     */
     public User findByUsername(String username) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isEmpty()) {
@@ -81,6 +98,10 @@ public class UserService {
         }
         return userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("ユーザーが見つかりません：" + username));
     }
+    
+    /**
+     * パスワードが強固かどうかをチェック
+     */
     
     private boolean isStrongPassword(String password) {
         if (password.length() < 8) {
@@ -96,10 +117,16 @@ public class UserService {
         return hasLetter && hasDigit;
     }
     
+    /*
+     * ユーザー情報を保存
+     */
     public void save(User user) {
         userRepository.save(user);
     }
     
+    /*
+     * 登録時に自動でログインするための処理
+     */
     public void autoLogin(User user) {
         CustomUserDetails userDetails = new CustomUserDetails(user);
         UsernamePasswordAuthenticationToken auth =
@@ -109,6 +136,9 @@ public class UserService {
         session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
     }
     
+    /**
+     * 出金処理(残高が不足していない場合のみ可能)
+     */
     public boolean withdraw(String username, int amount) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
@@ -122,6 +152,9 @@ public class UserService {
         return false;
     }
     
+    /*
+     * 出金処理
+     */
     public void deposit(String username, int amount) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
         if (optionalUser.isPresent()) {
@@ -133,16 +166,23 @@ public class UserService {
         }
     }
     
+    /**
+     * 指定されたユーザー名が存在するかどうかを確認
+     */
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
     }
     
-    //ハッシュ化するためのコード
+    /**
+     * パスコードがBCrypt形式で暗号化されているかを判定
+     */
     private boolean isBCryptHash(String password) {
         return password != null && password.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$");
     }
     
-    //ハッシュ化されているのかを確認する
+    /**
+     * 平文パスワードが登録されていた場合、BCryptで暗号化して再保存
+     */
     public void encodePlainPassword() {
         List<User> users = userRepository.findAll();
         for (User user : users) {
@@ -154,6 +194,70 @@ public class UserService {
         }
     }
     
+    
+    
+    /**
+     * ユーザー間の振込処理。送信側・受信側共に取引履歴が記録される
+     */
+    @Transactional
+    public String transfer(Long fromUserId, Long toUserId, Integer amount) {
+        if (fromUserId.equals(toUserId)) {
+            return "自分自身には振り込めません";
+        }
+        
+        Optional<User> fromOpt = userRepository.findById(fromUserId);
+        Optional<User> toOpt = userRepository.findById(toUserId);
+        if (fromOpt.isEmpty() || toOpt.isEmpty()) {
+            return "送信元または送信先ユーザーが存在しません";
+        }
+        
+        User fromUser = fromOpt.get();
+        User toUser = toOpt.get();
+        
+        if (fromUser.getBalance() < amount) {
+            return "残高が不足しています";
+        }
+        
+        // 残高更新
+        fromUser.setBalance(fromUser.getBalance() - amount);
+        toUser.setBalance(toUser.getBalance() + amount);
+        userRepository.save(fromUser);
+        userRepository.save(toUser);
+        
+        // 取引履歴（送信側）
+        Transaction fromTransaction = new Transaction();
+        fromTransaction.setUser(fromUser);
+        fromTransaction.setType("transfer_sent");
+        fromTransaction.setAmount(-amount);
+        fromTransaction.setCounterpartUsername(toUser.getUsername());
+        transactionRepository.save(fromTransaction);
+        
+        // 取引履歴（受信側）
+        Transaction toTransaction = new Transaction();
+        toTransaction.setUser(toUser);
+        toTransaction.setType("transfer_received");
+        toTransaction.setAmount(amount);
+        toTransaction.setCounterpartUsername(fromUser.getUsername());
+        transactionRepository.save(toTransaction);
+        
+        return "success";
+    }
+    
+    /**
+     * 現在ログイン中のユーザー情報を取得
+     */
+    public User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof CustomUserDetails) {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            return userDetails.getUser();
+        }
+        throw new RuntimeException("現在ログイン中のユーザーが取得できませんでした。");
+    }
+    
+    /**
+     * ログイン時刻を更新(ログ機能に利用可能)
+     */
     public void loginTime(String username) {
         Optional<User> optionaluser = userRepository.findByUsername(username);
         if (optionaluser.isPresent()) {

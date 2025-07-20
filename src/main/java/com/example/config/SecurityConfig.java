@@ -19,14 +19,32 @@ import com.example.atm.details.CustomUserDetailsService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+/**
+ * Spring Security の設定クラス
+ * - ログイン/ログアウトの設定
+ * - 認証処理の設定
+ * - パスワードエンコーダーの定義
+ */
+
 @Configuration
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     
+    /**
+     * コンストラクタでカスタムユーザー詳細サービスを注入
+     * customUserDetailsService ユーザー情報を取得するサービス
+     */
     public SecurityConfig(CustomUserDetailsService customUserDetailsService) {
         this.customUserDetailsService = customUserDetailsService;
     }
     
+    
+    /**
+     * セキュリティフィルタチェーンの設定
+     * ・特定のURLは認証不要に設定（ログイン、登録、CSS等）
+     * ・フォームログイン設定（ログインページ、成功後の遷移先）
+     * ・ログアウト時の処理（ログアウト成功時のリダイレクト）
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -58,11 +76,21 @@ public class SecurityConfig {
        return http.build();
     }
     
+    /**
+     * パスワードエンコーダーのBean定義
+     * BCryptPasswordEncoderを利用してパスワードをハッシュ化
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
     
+    
+    /**
+     * AuthenticationManagerのBean定義
+     * DaoAuthenticationProviderを用いてカスタムユーザー詳細サービスと
+     * パスワードエンコーダーを設定し、認証処理を構築する
+     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();

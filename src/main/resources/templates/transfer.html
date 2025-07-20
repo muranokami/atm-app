@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>振込</title>
+  
+  <!-- 共通スタイルの読み込み -->
+  <link rel="stylesheet" href="/style.css" >
+</head>
+<body>
+  <div class="container">
+	  <h1>振込</h1>
+	  
+	  <!-- エラーメッセージの表示（条件付き） -->
+	  <p th:if="${errorMessage}" th:text="${errorMessage}" class="transfer-error-message"></p>
+	  
+	  <!-- 成功メッセージの表示（条件付き） -->
+	  <p th:if="${successMessage}" th:text="${successMessage}" class="success"></p>
+	  
+	  
+	  <!-- 振込フォーム：/transaction/transfer にPOST送信 -->
+	  <form th:action="@{/transaction/transfer}" method="post" class="transfer-form">
+		  
+		  <!-- 振込先ユーザーID入力 -->
+		  <div class="form-group">
+			  <label for="targetUserId">振込先ユーザーID：</label>
+			  
+			  <!-- 数字のみ入力可能にする：pattern="\d+" + inputmode="numeric" -->
+			  <input type="text" id="targetUserId" name="targetUserId" required pattern="\d+" inputmode="numeric" />
+		  </div>
+		  
+		  <!-- 金額入力 -->
+		  <div class="form-group">
+			  <label for="amount">金額：</label>
+			  
+			  <!-- 最小100円〜最大500,000円まで、必須入力 -->
+			  <input type="number" id="amount" name="amount" min="100" max="500000" required />
+		  </div>
+		  
+		  <!-- 振込実行ボタン -->
+		  <div class="form-group">
+			  <button type="submit">振込実行</button>
+		  </div>
+	  </form>
+	  
+	  <!-- メニュー画面への戻るボタン -->
+	  <div class="back-link">
+		  <a th:href="@{/atm/}"><button type="button">メニューに戻る</button></a>
+	  </div>
+  </div>
+</body>
+</html>
